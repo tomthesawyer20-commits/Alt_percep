@@ -101,7 +101,7 @@
 
         <!-- Force exponent -->
         <div class="control-group">
-          <label>Force Exponent (n) <span id="lbl-n2">1.5</span></label>
+          <label>Force Exponent (n) <span id="lbl-nexp">1.5</span></label>
           <input type="range" id="ctrl-nexp" min="0.5" max="3.0" step="0.1" value="1.5" />
         </div>
 
@@ -238,7 +238,7 @@
             <input type="range" id="cosmo-h0" min="55" max="85" step="0.2" value="67.4" />
           </div>
           <div id="cosmo-warning" style="display:none;color:#e0b05b;font-size:.82rem;margin-top:.5rem">
-            ⚠ Ω_m + Ω_Λ &gt; 1 — the universe would be closed. Adjusting Ω_Λ automatically.
+            ⚠ Ω_m + Ω_Λ &gt; 1 — the universe would be closed. Please reduce Ω_m or Ω_Λ manually.
           </div>
         </div>
         <div>
@@ -330,7 +330,8 @@ function drawFieldGlow(p) {
 }
 
 function drawForceLines() {
-  if (particles.length > 30) return; // skip for performance
+  // Skip force lines above 30 particles: O(n²) line drawing causes frame drops beyond this threshold
+  if (particles.length > 30) return;
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
       const pi = particles[i], pj = particles[j];
@@ -445,7 +446,7 @@ function wireSlider(id, lblId, key, decimals = 0) {
 
 wireSlider('ctrl-g',    'lbl-g',    'G2d');
 wireSlider('ctrl-k',    'lbl-k',    'k2d');
-wireSlider('ctrl-nexp', 'lbl-n2',   'forceExp', 1);
+wireSlider('ctrl-nexp', 'lbl-nexp',   'forceExp', 1);
 wireSlider('ctrl-damp', 'lbl-damp', 'damping', 3);
 
 document.getElementById('ctrl-n').addEventListener('input', e => {
@@ -527,7 +528,7 @@ document.getElementById('ctrl-preset').addEventListener('change', e => {
   document.getElementById('ctrl-damp').value = p.damping;
   document.getElementById('lbl-g').textContent    = p.G2d;
   document.getElementById('lbl-k').textContent    = p.k2d;
-  document.getElementById('lbl-n2').textContent   = p.forceExp.toFixed(1);
+  document.getElementById('lbl-nexp').textContent   = p.forceExp.toFixed(1);
   document.getElementById('lbl-damp').textContent = p.damping.toFixed(3);
   logEvent(`Preset loaded: ${e.target.value}`);
 });
