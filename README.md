@@ -1,80 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unitary Physical Monadology | The Kinetic Ledger</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .glow { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
-    </style>
-</head>
-<body class="p-6">
-    <header class="max-w-6xl mx-auto text-center py-12">
-        <h1 class="text-5xl font-bold tracking-tighter text-blue-400 mb-4">UNITARY PHYSICAL MONADOLOGY</h1>
-        <p class="text-xl text-slate-400">The 100% Deterministic Mechanical Audit of Reality</p>
-    </header>
+# Alt_percep
 
-    <main class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-        
-        <section class="glass p-8 rounded-2xl glow">
-            <h2 class="text-2xl font-bold mb-4 border-b border-blue-500 pb-2">KINETIC VELOCITY CALCULATOR</h2>
-            <p class="text-sm mb-6 text-slate-300">Adjust the Medium Density to see the RBF Velocity Saturation.</p>
-            
-            <div class="space-y-4">
-                <label class="block">
-                    <span class="text-slate-400">Medium Density (ρc)</span>
-                    <input type="range" id="rho" min="0.1" max="5" step="0.1" value="1" class="w-full">
-                </label>
-                <div class="p-4 bg-slate-900 rounded-lg text-center">
-                    <span class="text-slate-500 block">Calculated Velocity (v)</span>
-                    <span id="v-result" class="text-4xl font-mono text-blue-400">0.9500</span>
-                </div>
-            </div>
-        </section>
+> **Alternative perception of the grand architecture of the physics of the universe.**
 
-        <section class="glass p-8 rounded-2xl">
-            <h2 class="text-2xl font-bold mb-4 border-b border-blue-500 pb-2">THE CLAIM</h2>
-            <ul class="space-y-4 text-slate-300">
-                <li><strong>1. No Dark Matter:</strong> High orbital speeds are a result of thinning medium density at galactic rims.</li>
-                <li><strong>2. No Spacetime:</strong> Gravity is the physical displacement of the Stagnant Medium.</li>
-                <li><strong>3. No Entropy:</strong> "The Fuzz" is accounted-for Observational Displacement Inventory.</li>
-            </ul>
-        </section>
+This project presents the **Unified Geometric Field (UGF)** model — a theoretical framework proposing that all four fundamental forces (gravity, electromagnetism, strong, and weak) are emergent phenomena arising from spacetime curvature at different geometric scales.
 
-        <section class="glass p-8 rounded-2xl md:col-span-2">
-            <h2 class="text-2xl font-bold mb-6 text-center">INTERACTIVE AUDIT PORTAL</h2>
-            <div class="space-y-4">
-                <details class="group bg-slate-800 p-4 rounded-xl cursor-pointer">
-                    <summary class="font-bold text-blue-300">What about Einstein's Time Dilation?</summary>
-                    <p class="mt-2 text-slate-400">Time doesn't stretch. The Medium's resistance physically slows the RBF's internal harmonic "wiggle" ($H_{ad}$) at high speeds. It is a mechanical slowdown, not a temporal one.</p>
-                </details>
-                <details class="group bg-slate-800 p-4 rounded-xl cursor-pointer">
-                    <summary class="font-bold text-blue-300">Is there "Empty Space"?</summary>
-                    <p class="mt-2 text-slate-400">No. Space is a 100% saturated Stagnant Condensate. A "vacuum" is merely a region where no RBFs are currently displacing the Medium beads.</p>
-                </details>
-            </div>
-        </section>
-    </main>
+---
 
-    <footer class="text-center mt-20 text-slate-600 text-sm italic">
-        Internal Audit Version 4.2 | Balanced Physicality Ledger | All Claims Timestamped 2026
-    </footer>
+## 🚀 Quick Start
 
-    <script>
-        const rhoInput = document.getElementById('rho');
-        const vResult = document.getElementById('v-result');
-        const phi = 0.95;
-        const h_ad = 1.0;
+Open the HTML files in any modern browser — no build step or server required:
 
-        rhoInput.addEventListener('input', () => {
-            const rho = parseFloat(rhoInput.value);
-            const v = (phi * h_ad) / (rho);
-            vResult.innerText = v.toFixed(4);
-        });
-    </script>
-</body>
-</html>
+| File | Description |
+|------|-------------|
+| [`index.html`](index.html) | **Data Explorer** — interactive charts & reference tables (Goal 1) |
+| [`simulator.html`](simulator.html) | **UGF Simulator** — live particle field simulation (Goal 3) |
+| [`model.js`](model.js) | **Core model** — UGF equations & computation functions (Goal 2) |
+| [`style.css`](style.css) | Shared dark-theme stylesheet |
 
+For a local server (optional):
+```sh
+npx serve .
+# or
+python3 -m http.server 8080
+```
+
+---
+
+## 📊 Goal 1 — Data Explorer (`index.html`)
+
+An interactive webpage for viewing the UGF model data:
+
+- **Force Strength Chart** — relative strengths of all four forces across 10 decades of length scale
+- **Hubble Rate Chart** — UGF-modified Friedmann expansion vs standard ΛCDM
+- **Energy Density Chart** — fractional cosmic energy budgets across epochs
+- **UGF vs ΛCDM Deviation** — percentage difference in expansion history
+- **Reference tables** — physical constants and model parameters
+
+---
+
+## ⚙️ Goal 2 — Working Model (`model.js`)
+
+A self-contained JavaScript module implementing the UGF physics model:
+
+### Core equations
+
+```
+F_ugf(r)  = κ · (l_P / r)^n          geometric coupling function
+H²(z)     = H₀² [Ω_m(1+z)³ + Ω_Λ + Ω_geo(1+z)^(4/3)]   modified Friedmann
+F_grav    = G·m₁m₂/r² · [1 + κ_g·(l_P/r)²]   UGF gravity
+F_strong  = α_s·ℏc/r² · e^(-r/r_s) · (1 + κ_s)   UGF strong force
+```
+
+### Usage in browser
+
+```html
+<script src="model.js"></script>
+<script>
+  // Force strengths at 1 fm
+  const f = UGF.forceStrengthsAt(1e-15);
+  console.log(f.strongRatio);   // → ~10^38
+
+  // Hubble rate at z=1
+  const H = UGF.hubbleRate(1);  // km/s/Mpc
+
+  // Cosmological series
+  const series = UGF.hubbleSeries(0, 3, 60);
+</script>
+```
+
+### Usage in Node.js
+
+```js
+const UGF = require('./model.js');
+console.log(UGF.CONSTANTS.c);  // 299800000 m/s
+```
+
+---
+
+## 🎮 Goal 3 — Interactive Simulator (`simulator.html`)
+
+A live 2-D particle field simulation demonstrating the UGF force law:
+
+- **Real-time physics** — particles interact via UGF gravity + EM-like coupling
+- **Adjustable parameters** — gravity strength, EM coupling, force exponent, damping
+- **5 presets** — Default, Gravity-dominated, EM-dominated, Planck-scale, Chaotic
+- **Click to add particles** — left-click for positive, shift+click for negative
+- **Spawn Cluster** button — drops 6 new particles near the canvas centre
+- **Hubble Rate Explorer** — tune Ω_m, Ω_Λ, Ω_geo, H₀ and watch the expansion history update live
+
+---
+
+## 🧪 Running Tests
+
+```sh
+node model.test.js
+```
+
+---
+
+## 📐 Model Summary
+
+| Force | Scale | Mechanism | κ | n |
+|-------|-------|-----------|---|---|
+| Gravity | Large (>1 mm) | Riemannian curvature | 1.0 | 2 |
+| Electromagnetism | Medium | Torsional oscillations | 1/137 | 1 |
+| Strong | ~1 fm | Curvature nodes | 1.0 | 0 |
+| Weak | <0.1 fm | Curvature transitions | 1.18×10⁻⁵ | 0.5 |
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).

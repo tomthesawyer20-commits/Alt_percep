@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alt_percep — UGF Simulator</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* Simulator-page extras */
+    .legend-item { display: flex; align-items: center; gap: .45rem; font-size: .82rem; color: var(--text-muted); }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .legend-row { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: .75rem 0; }
+    #log {
+      height: 120px;
+      overflow-y: auto;
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .6rem .8rem;
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--text-muted);
+    }
+    #log .log-line { margin: 0; }
+    .speed-row { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+    .badge-sm {
+      display: inline-block;
+      background: rgba(91,141,238,.15);
+      border: 1px solid rgba(91,141,238,.3);
+      color: var(--accent1);
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .15rem .5rem;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────────── -->
+<nav>
+  <span class="logo">⬡ Alt_percep</span>
+  <ul class="nav-links">
+    <li><a href="index.html">Data Explorer</a></li>
+    <li><a href="simulator.html" class="active">Simulator</a></li>
+    <li><a href="https://github.com/tomthesawyer20-commits/Alt_percep" target="_blank" rel="noopener">GitHub</a></li>
+  </ul>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────────── -->
+<header class="hero" style="padding:3rem 2rem 2.5rem">
+  <span class="badge">Interactive UGF Simulator</span>
+  <h1>Particle Field Simulator</h1>
+  <p class="tagline">
+    Watch charged particles interact under the Unified Geometric Field force law.
+    Adjust parameters in real time and observe how the geometric coupling reshapes dynamics.
+  </p>
+</header>
+
+<!-- ── Simulator ───────────────────────────────────────────── -->
+<main>
+
+  <section>
+    <div class="section-header">
+      <span class="section-label">Live Simulation</span>
+      <h2>UGF Force Field</h2>
+      <p>
+        Blue particles carry positive charge; pink carry negative charge.
+        Gravity draws them together; the EM-like force separates same-sign pairs.
+        The UGF geometric correction intensifies both interactions at short range.
+      </p>
+    </div>
+
+    <div class="sim-panel">
+
+      <!-- Controls sidebar -->
+      <div class="sim-controls card">
+        <p class="card-title">Simulation Controls</p>
+
+        <!-- Particle count -->
+        <div class="control-group">
+          <label>Particles <span id="lbl-n">20</span></label>
+          <input type="range" id="ctrl-n" min="2" max="60" value="20" />
+        </div>
+
+        <!-- Gravity coupling -->
+        <div class="control-group">
+          <label>Gravity (G₂ₐ) <span id="lbl-g">500</span></label>
+          <input type="range" id="ctrl-g" min="50" max="2000" value="500" />
+        </div>
+
+        <!-- EM coupling -->
+        <div class="control-group">
+          <label>EM Coupling (k₂ₐ) <span id="lbl-k">800</span></label>
+          <input type="range" id="ctrl-k" min="0" max="3000" value="800" />
+        </div>
+
+        <!-- Force exponent -->
+        <div class="control-group">
+          <label>Force Exponent (n) <span id="lbl-nexp">1.5</span></label>
+          <input type="range" id="ctrl-nexp" min="0.5" max="3.0" step="0.1" value="1.5" />
+        </div>
+
+        <!-- Damping -->
+        <div class="control-group">
+          <label>Damping <span id="lbl-damp">0.99</span></label>
+          <input type="range" id="ctrl-damp" min="0.90" max="1.00" step="0.005" value="0.99" />
+        </div>
+
+        <!-- Preset -->
+        <div class="control-group">
+          <label>Preset</label>
+          <select id="ctrl-preset">
+            <option value="default">Default (balanced)</option>
+            <option value="gravity_dom">Gravity-dominated</option>
+            <option value="em_dom">EM-dominated</option>
+            <option value="planck">Planck-scale curvature</option>
+            <option value="chaos">Chaotic orbits</option>
+          </select>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- Action buttons -->
+        <div class="speed-row">
+          <button class="btn btn-primary" id="btn-pause" style="flex:1">⏸ Pause</button>
+          <button class="btn btn-outline"  id="btn-reset" style="flex:1">↺ Reset</button>
+        </div>
+        <button class="btn btn-outline" id="btn-spawn" style="width:100%;margin-top:.5rem">
+          + Spawn Cluster
+        </button>
+        <button class="btn btn-outline" id="btn-darkmatter" style="width:100%;margin-top:.5rem">
+          ◇ Spawn Dark Matter
+        </button>
+
+        <hr class="divider" />
+
+        <!-- Trail / vector controls -->
+        <div class="control-group">
+          <label>Trail Length <span id="lbl-trail">40</span></label>
+          <input type="range" id="ctrl-trail" min="0" max="100" value="40" />
+        </div>
+        <div class="speed-row">
+          <button class="btn btn-outline" id="btn-trails"  style="flex:1">🌠 Trails: On</button>
+          <button class="btn btn-outline" id="btn-vectors" style="flex:1">↗ Vectors: Off</button>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- Live stats -->
+        <p class="card-title" style="margin-bottom:.5rem">Live Stats</p>
+        <div class="sim-stats">
+          <div class="sim-stat">
+            <div class="ss-label">Particles</div>
+            <div class="ss-val" id="stat-n">20</div>
+          </div>
+          <div class="sim-stat">
+            <div class="ss-label">Frame</div>
+            <div class="ss-val" id="stat-frame">0</div>
+          </div>
+          <div class="sim-stat">
+            <div class="ss-label">Avg. Speed</div>
+            <div class="ss-val" id="stat-speed">0</div>
+          </div>
+          <div class="sim-stat">
+            <div class="ss-label">Clusters</div>
+            <div class="ss-val" id="stat-clusters">0</div>
+          </div>
+          <div class="sim-stat" style="grid-column:1/-1">
+            <div class="ss-label">Kinetic Energy</div>
+            <div class="ss-val" id="stat-ke" style="font-size:.85rem">0.0</div>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- Event log -->
+        <p class="card-title" style="margin-bottom:.4rem">Event Log</p>
+        <div id="log"></div>
+      </div>
+
+      <!-- Canvas -->
+      <div class="sim-canvas-wrap">
+        <div class="legend-row">
+          <div class="legend-item"><div class="legend-dot" style="background:#5b8dee"></div>Positive charge</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e05b8d"></div>Negative charge</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c0c8e8;border:1px solid #8090c0"></div>Dark matter (neutral)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(91,224,176,.35);border:1px solid #5be0b0"></div>UGF field strength</div>
+        </div>
+        <canvas id="sim"></canvas>
+        <p class="tooltip-text" style="margin-top:.6rem">
+          Click to add a positive particle · Shift+click for negative · Ctrl/⌘+click for dark matter.
+          The field glow around each particle indicates local geometric coupling intensity.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Explanation cards -->
+  <section>
+    <div class="section-header">
+      <span class="section-label">How It Works</span>
+      <h2>Simulation Engine</h2>
+    </div>
+    <div class="grid-3">
+      <div class="card">
+        <p class="card-title">🌌 Force Law</p>
+        <div class="eq-box" style="margin-bottom:.75rem">F = (G·mᵢmⱼ − k·qᵢqⱼ) / r^n</div>
+        <p>A 2-D analogue of the UGF force law. The exponent <em>n</em> controls how quickly
+           force falls off with distance — set by the geometric scale exponent.</p>
+      </div>
+      <div class="card">
+        <p class="card-title">⚡ Geometric Coupling</p>
+        <div class="eq-box" style="margin-bottom:.75rem">F_ugf = F_base · [1 + κ·(l_P/r)^n]</div>
+        <p>At short range the Planck-scale curvature correction (κ term) amplifies the force,
+           producing clustering behaviour absent in purely Newtonian dynamics.</p>
+      </div>
+      <div class="card">
+        <p class="card-title">🔄 Time Integration</p>
+        <div class="eq-box" style="margin-bottom:.75rem">v(t+dt) = v(t)·η + (F/m)·dt</div>
+        <p>Symplectic Euler integration with a velocity damping factor η to keep the
+           simulation stable. Particles reflect off the canvas boundary.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hubble tuner -->
+  <section>
+    <div class="section-header">
+      <span class="section-label">Cosmology Tool</span>
+      <h2>Interactive Hubble Rate Explorer</h2>
+      <p>Tune cosmological parameters and instantly see how the UGF model's expansion history
+         changes relative to standard ΛCDM.</p>
+    </div>
+    <div class="card">
+      <div class="grid-2" style="gap:2rem">
+        <div>
+          <!-- Parameter sliders -->
+          <div class="control-group" style="margin-bottom:1rem">
+            <label>Ω_m (matter) <span id="lbl-om">0.315</span></label>
+            <input type="range" id="cosmo-om" min="0.1" max="0.9" step="0.005" value="0.315" />
+          </div>
+          <div class="control-group" style="margin-bottom:1rem">
+            <label>Ω_Λ (dark energy) <span id="lbl-ol">0.685</span></label>
+            <input type="range" id="cosmo-ol" min="0.0" max="0.9" step="0.005" value="0.685" />
+          </div>
+          <div class="control-group" style="margin-bottom:1rem">
+            <label>Ω_geo (geometric) <span id="lbl-og">0.020</span></label>
+            <input type="range" id="cosmo-og" min="0.0" max="0.2" step="0.002" value="0.020" />
+          </div>
+          <div class="control-group" style="margin-bottom:1rem">
+            <label>H₀ (km/s/Mpc) <span id="lbl-h0">67.4</span></label>
+            <input type="range" id="cosmo-h0" min="55" max="85" step="0.2" value="67.4" />
+          </div>
+          <div id="cosmo-warning" style="display:none;color:#e0b05b;font-size:.82rem;margin-top:.5rem">
+            ⚠ Ω_m + Ω_Λ &gt; 1 — the universe would be closed. Please reduce Ω_m or Ω_Λ manually.
+          </div>
+        </div>
+        <div>
+          <div class="chart-wrap tall">
+            <canvas id="chartCosmo"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    Alt_percep · Unified Geometric Field Model ·
+    <a href="https://github.com/tomthesawyer20-commits/Alt_percep" target="_blank" rel="noopener">GitHub</a>
+    · MIT License
+  </p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="model.js"></script>
+<script>
+"use strict";
+// ──────────────────────────────────────────────────────────────
+// 1.  Canvas setup
+// ──────────────────────────────────────────────────────────────
+const canvas  = document.getElementById('sim');
+const ctx     = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const wrap = canvas.parentElement;
+  canvas.width  = wrap.clientWidth;
+  canvas.height = Math.max(480, Math.round(wrap.clientWidth * 0.55));
+}
+resizeCanvas();
+window.addEventListener('resize', () => { resizeCanvas(); });
+
+// ──────────────────────────────────────────────────────────────
+// 2.  Simulation state
+// ──────────────────────────────────────────────────────────────
+let particles  = [];
+let frame      = 0;
+let paused     = false;
+let animHandle = null;
+
+let simOpts = {
+  G2d:      500,
+  k2d:      800,
+  forceExp: 1.5,
+  damping:  0.99,
+  softening:20,
+};
+
+let showTrails  = true;
+let showVectors = false;
+let trailLen    = 40;
+
+function particleColor(p) {
+  if (p.charge === 0) return '#c0c8e8'; // dark matter
+  return p.charge > 0 ? '#5b8dee' : '#e05b8d';
+}
+
+function initParticles(n) {
+  particles = [];
+  const W = canvas.width, H = canvas.height;
+  for (let i = 0; i < n; i++) {
+    const charge = (i % 2 === 0) ? 1 : -1;
+    const p = UGF.createParticle(i, W, H, {
+      mass: 0.8 + Math.random() * 1.2,
+      charge,
+      radius: 6 + Math.floor(Math.random() * 4),
+    });
+    p.color = particleColor(p);
+    p.trail = [];
+    particles.push(p);
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+// 3.  Rendering
+// ──────────────────────────────────────────────────────────────
+function drawFieldGlow(p) {
+  const intensity = Math.min(1, simOpts.G2d / 1000 + simOpts.k2d / 2000);
+  const r = p.radius * (2 + intensity * 4);
+  const grad = ctx.createRadialGradient(p.x, p.y, p.radius * 0.5, p.x, p.y, r);
+  const col = p.charge > 0 ? '91,141,238' : p.charge < 0 ? '224,91,141' : '150,160,200';
+  grad.addColorStop(0, `rgba(${col},${0.25 * intensity})`);
+  grad.addColorStop(1, `rgba(${col},0)`);
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
+  ctx.fill();
+}
+
+function drawTrails() {
+  particles.forEach(p => {
+    if (!p.trail || p.trail.length < 2) return;
+    const col = p.charge > 0 ? '91,141,238' : p.charge < 0 ? '224,91,141' : '150,160,200';
+    for (let i = 1; i < p.trail.length; i++) {
+      const alpha = (i / p.trail.length) * 0.35;
+      ctx.beginPath();
+      ctx.moveTo(p.trail[i - 1].x, p.trail[i - 1].y);
+      ctx.lineTo(p.trail[i].x, p.trail[i].y);
+      ctx.strokeStyle = `rgba(${col},${alpha})`;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    }
+  });
+}
+
+function drawVelocityVectors() {
+  const scale = 12;
+  particles.forEach(p => {
+    const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+    if (speed < 0.05) return;
+    const ex = p.x + p.vx * scale;
+    const ey = p.y + p.vy * scale;
+    const angle = Math.atan2(p.vy, p.vx);
+    const hs = 5;
+    ctx.save();
+    ctx.globalAlpha = 0.65;
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - hs * Math.cos(angle - 0.4), ey - hs * Math.sin(angle - 0.4));
+    ctx.lineTo(ex - hs * Math.cos(angle + 0.4), ey - hs * Math.sin(angle + 0.4));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
+function drawForceLines() {
+  // Skip force lines above 30 particles: O(n²) line drawing causes frame drops beyond this threshold
+  if (particles.length > 30) return;
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const pi = particles[i], pj = particles[j];
+      const dx = pj.x - pi.x, dy = pj.y - pi.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > 120) continue;
+      const alpha = Math.max(0, (120 - dist) / 120) * 0.18;
+      const col = (pi.charge === pj.charge) ? '224,91,141' : '91,141,238';
+      ctx.beginPath();
+      ctx.moveTo(pi.x, pi.y);
+      ctx.lineTo(pj.x, pj.y);
+      ctx.strokeStyle = `rgba(${col},${alpha})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+}
+
+function drawParticle(p) {
+  drawFieldGlow(p);
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+  ctx.fillStyle = p.color;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Subtle grid
+  ctx.strokeStyle = 'rgba(42,49,85,0.25)';
+  ctx.lineWidth   = 0.5;
+  const step = 60;
+  for (let x = 0; x < canvas.width; x += step) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+  }
+  for (let y = 0; y < canvas.height; y += step) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+  }
+
+  if (showTrails) drawTrails();
+  drawForceLines();
+  particles.forEach(drawParticle);
+  if (showVectors) drawVelocityVectors();
+
+  // Frame counter overlay
+  ctx.fillStyle = 'rgba(122,132,170,0.5)';
+  ctx.font      = '11px JetBrains Mono, monospace';
+  ctx.fillText(`Frame ${frame}`, 10, canvas.height - 10);
+}
+
+// ──────────────────────────────────────────────────────────────
+// 4.  Simulation loop
+// ──────────────────────────────────────────────────────────────
+function computeAvgSpeed() {
+  if (!particles.length) return 0;
+  const sum = particles.reduce((s, p) => s + Math.sqrt(p.vx * p.vx + p.vy * p.vy), 0);
+  return (sum / particles.length).toFixed(2);
+}
+
+function countClusters() {
+  // Simple: count particles within 50px of at least one other
+  let clusterCount = 0;
+  particles.forEach((p, i) => {
+    const near = particles.some((q, j) => j !== i && Math.hypot(p.x - q.x, p.y - q.y) < 50);
+    if (near) clusterCount++;
+  });
+  return Math.ceil(clusterCount / 2);
+}
+
+function updateStats() {
+  document.getElementById('stat-n').textContent        = particles.length;
+  document.getElementById('stat-frame').textContent    = frame;
+  document.getElementById('stat-speed').textContent    = computeAvgSpeed();
+  document.getElementById('stat-clusters').textContent = countClusters();
+  document.getElementById('stat-ke').textContent       = UGF.computeKineticEnergy(particles).toFixed(1);
+}
+
+function loop() {
+  if (!paused) {
+    if (showTrails && trailLen > 0) {
+      particles.forEach(p => {
+        if (!p.trail) p.trail = [];
+        p.trail.push({ x: p.x, y: p.y });
+        if (p.trail.length > trailLen) p.trail.shift();
+      });
+    }
+    UGF.stepSimulation(particles, 0.016, canvas.width, canvas.height, simOpts);
+    frame++;
+    if (frame % 60 === 0) updateStats();
+  }
+  render();
+  animHandle = requestAnimationFrame(loop);
+}
+
+// ──────────────────────────────────────────────────────────────
+// 5.  Event log
+// ──────────────────────────────────────────────────────────────
+function logEvent(msg) {
+  const el  = document.getElementById('log');
+  const pre = document.createElement('p');
+  pre.className = 'log-line';
+  pre.textContent = `[${frame}] ${msg}`;
+  el.prepend(pre);
+  while (el.children.length > 30) el.removeChild(el.lastChild);
+}
+
+// ──────────────────────────────────────────────────────────────
+// 6.  Controls wiring
+// ──────────────────────────────────────────────────────────────
+function wireSlider(id, lblId, key, decimals = 0) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    const v = parseFloat(el.value);
+    document.getElementById(lblId).textContent = v.toFixed(decimals);
+    if (key) simOpts[key] = v;
+  });
+}
+
+wireSlider('ctrl-g',    'lbl-g',    'G2d');
+wireSlider('ctrl-k',    'lbl-k',    'k2d');
+wireSlider('ctrl-nexp', 'lbl-nexp',   'forceExp', 1);
+wireSlider('ctrl-damp', 'lbl-damp', 'damping', 3);
+
+document.getElementById('ctrl-n').addEventListener('input', e => {
+  const n = parseInt(e.target.value);
+  document.getElementById('lbl-n').textContent = n;
+});
+
+document.getElementById('btn-pause').addEventListener('click', () => {
+  paused = !paused;
+  document.getElementById('btn-pause').textContent = paused ? '▶ Resume' : '⏸ Pause';
+  logEvent(paused ? 'Simulation paused.' : 'Simulation resumed.');
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  const n = parseInt(document.getElementById('ctrl-n').value);
+  frame = 0;
+  initParticles(n);
+  updateStats();
+  logEvent(`Reset with ${n} particles.`);
+});
+
+document.getElementById('btn-spawn').addEventListener('click', () => {
+  const cx = canvas.width  / 2 + (Math.random() - 0.5) * 100;
+  const cy = canvas.height / 2 + (Math.random() - 0.5) * 100;
+  for (let i = 0; i < 6; i++) {
+    const charge = i % 2 === 0 ? 1 : -1;
+    const p = UGF.createParticle(particles.length + i, canvas.width, canvas.height, {
+      x: cx + (Math.random() - 0.5) * 60,
+      y: cy + (Math.random() - 0.5) * 60,
+      vx: (Math.random() - 0.5) * 3,
+      vy: (Math.random() - 0.5) * 3,
+      mass: 1 + Math.random(),
+      charge,
+      radius: 6,
+    });
+    p.color = particleColor(p);
+    p.trail = [];
+    particles.push(p);
+  }
+  updateStats();
+  logEvent('Spawned cluster of 6 particles.');
+});
+
+// Click-to-add particle
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (canvas.width  / rect.width);
+  const y = (e.clientY - rect.top)  * (canvas.height / rect.height);
+  const isDark = e.ctrlKey || e.metaKey;
+  const charge = isDark ? 0 : (e.shiftKey ? -1 : 1);
+  const mass   = isDark ? 3 : 1;
+  const radius = isDark ? 9 : 7;
+  const p = UGF.createParticle(particles.length, canvas.width, canvas.height, {
+    x, y,
+    vx: (Math.random() - 0.5) * 2,
+    vy: (Math.random() - 0.5) * 2,
+    mass,
+    charge,
+    radius,
+  });
+  p.color = particleColor(p);
+  p.trail = [];
+  particles.push(p);
+  updateStats();
+  const chargeLabel = isDark ? 'dark matter' : (charge > 0 ? '+' : '−');
+  logEvent(`Particle added at (${Math.round(x)}, ${Math.round(y)}) type=${chargeLabel}`);
+});
+
+// Presets
+const PRESETS = {
+  default:      { G2d: 500,  k2d: 800,  forceExp: 1.5, damping: 0.99 },
+  gravity_dom:  { G2d: 1800, k2d: 100,  forceExp: 2.0, damping: 0.98 },
+  em_dom:       { G2d: 100,  k2d: 2500, forceExp: 1.8, damping: 0.99 },
+  planck:       { G2d: 2000, k2d: 2000, forceExp: 0.8, damping: 1.00 },
+  chaos:        { G2d: 900,  k2d: 900,  forceExp: 2.8, damping: 1.00 },
+};
+
+document.getElementById('ctrl-preset').addEventListener('change', e => {
+  const p = PRESETS[e.target.value];
+  if (!p) return;
+  simOpts = { ...simOpts, ...p };
+  document.getElementById('ctrl-g').value    = p.G2d;
+  document.getElementById('ctrl-k').value    = p.k2d;
+  document.getElementById('ctrl-nexp').value = p.forceExp;
+  document.getElementById('ctrl-damp').value = p.damping;
+  document.getElementById('lbl-g').textContent    = p.G2d;
+  document.getElementById('lbl-k').textContent    = p.k2d;
+  document.getElementById('lbl-nexp').textContent   = p.forceExp.toFixed(1);
+  document.getElementById('lbl-damp').textContent = p.damping.toFixed(3);
+  logEvent(`Preset loaded: ${e.target.value}`);
+});
+
+// ──────────────────────────────────────────────────────────────
+// 6b.  New feature controls
+// ──────────────────────────────────────────────────────────────
+
+// Trail length slider
+document.getElementById('ctrl-trail').addEventListener('input', e => {
+  trailLen = parseInt(e.target.value);
+  document.getElementById('lbl-trail').textContent = trailLen;
+  if (trailLen === 0) particles.forEach(p => { p.trail = []; });
+});
+
+// Trails toggle
+document.getElementById('btn-trails').addEventListener('click', () => {
+  showTrails = !showTrails;
+  document.getElementById('btn-trails').textContent = `🌠 Trails: ${showTrails ? 'On' : 'Off'}`;
+  if (!showTrails) particles.forEach(p => { p.trail = []; });
+});
+
+// Velocity vectors toggle
+document.getElementById('btn-vectors').addEventListener('click', () => {
+  showVectors = !showVectors;
+  document.getElementById('btn-vectors').textContent = `↗ Vectors: ${showVectors ? 'On' : 'Off'}`;
+});
+
+// Dark matter spawn
+document.getElementById('btn-darkmatter').addEventListener('click', () => {
+  for (let i = 0; i < 3; i++) {
+    const cx = canvas.width  / 2 + (Math.random() - 0.5) * 200;
+    const cy = canvas.height / 2 + (Math.random() - 0.5) * 200;
+    const p = UGF.createParticle(particles.length + i, canvas.width, canvas.height, {
+      x: cx,
+      y: cy,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: (Math.random() - 0.5) * 1.5,
+      mass: 3 + Math.random() * 2,
+      charge: 0,
+      radius: 9,
+    });
+    p.color = particleColor(p);
+    p.trail = [];
+    particles.push(p);
+  }
+  updateStats();
+  logEvent('Spawned 3 dark matter particles.');
+});
+
+// ──────────────────────────────────────────────────────────────
+// 7.  Hubble cosmology chart
+// ──────────────────────────────────────────────────────────────
+Chart.defaults.color       = '#7a84aa';
+Chart.defaults.borderColor = '#2a3155';
+Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+
+let cosmoChart = null;
+
+function buildCosmoChart(params) {
+  const data = UGF.hubbleChartData(params);
+  if (cosmoChart) {
+    cosmoChart.data.datasets[0].data = data.H_ugf;
+    cosmoChart.data.datasets[1].data = data.H_lcdm;
+    cosmoChart.update('none');
+    return;
+  }
+  cosmoChart = new Chart(document.getElementById('chartCosmo'), {
+    type: 'line',
+    data: {
+      labels: data.labels,
+      datasets: [
+        { label: 'UGF Model', data: data.H_ugf,  borderColor: '#5b8dee', tension: .3 },
+        { label: 'ΛCDM',      data: data.H_lcdm, borderColor: '#e05b8d', tension: .3, borderDash: [6,3] },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 200 },
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        y: { title: { display: true, text: 'H(z) [km/s/Mpc]' } },
+        x: { title: { display: true, text: 'Redshift z' }, ticks: { maxTicksLimit: 8 } },
+      },
+    },
+  });
+}
+
+function readCosmoParams() {
+  return {
+    Om: parseFloat(document.getElementById('cosmo-om').value),
+    OL: parseFloat(document.getElementById('cosmo-ol').value),
+    Og: parseFloat(document.getElementById('cosmo-og').value),
+    H0: parseFloat(document.getElementById('cosmo-h0').value),
+  };
+}
+
+function onCosmoInput() {
+  const params = readCosmoParams();
+  document.getElementById('lbl-om').textContent = params.Om.toFixed(3);
+  document.getElementById('lbl-ol').textContent = params.OL.toFixed(3);
+  document.getElementById('lbl-og').textContent = params.Og.toFixed(3);
+  document.getElementById('lbl-h0').textContent = params.H0.toFixed(1);
+  const warn = document.getElementById('cosmo-warning');
+  warn.style.display = (params.Om + params.OL > 1.05) ? 'block' : 'none';
+  buildCosmoChart(params);
+}
+
+['cosmo-om','cosmo-ol','cosmo-og','cosmo-h0'].forEach(id =>
+  document.getElementById(id).addEventListener('input', onCosmoInput)
+);
+
+// ──────────────────────────────────────────────────────────────
+// 8.  Initialise
+// ──────────────────────────────────────────────────────────────
+initParticles(20);
+updateStats();
+logEvent('Simulation started.');
+buildCosmoChart(readCosmoParams());
+loop();
+</script>
+</body>
+</html>
