@@ -133,6 +133,21 @@
         <button class="btn btn-outline" id="btn-spawn" style="width:100%;margin-top:.5rem">
           + Spawn Cluster
         </button>
+        <button class="btn btn-outline" id="btn-darkmatter" style="width:100%;margin-top:.5rem">
+          ◇ Spawn Dark Matter
+        </button>
+
+        <hr class="divider" />
+
+        <!-- Trail / vector controls -->
+        <div class="control-group">
+          <label>Trail Length <span id="lbl-trail">40</span></label>
+          <input type="range" id="ctrl-trail" min="0" max="100" value="40" />
+        </div>
+        <div class="speed-row">
+          <button class="btn btn-outline" id="btn-trails"  style="flex:1">🌠 Trails: On</button>
+          <button class="btn btn-outline" id="btn-vectors" style="flex:1">↗ Vectors: Off</button>
+        </div>
 
         <hr class="divider" />
 
@@ -155,6 +170,10 @@
             <div class="ss-label">Clusters</div>
             <div class="ss-val" id="stat-clusters">0</div>
           </div>
+          <div class="sim-stat" style="grid-column:1/-1">
+            <div class="ss-label">Kinetic Energy</div>
+            <div class="ss-val" id="stat-ke" style="font-size:.85rem">0.0</div>
+          </div>
         </div>
 
         <hr class="divider" />
@@ -169,11 +188,12 @@
         <div class="legend-row">
           <div class="legend-item"><div class="legend-dot" style="background:#5b8dee"></div>Positive charge</div>
           <div class="legend-item"><div class="legend-dot" style="background:#e05b8d"></div>Negative charge</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c0c8e8;border:1px solid #8090c0"></div>Dark matter (neutral)</div>
           <div class="legend-item"><div class="legend-dot" style="background:rgba(91,224,176,.35);border:1px solid #5be0b0"></div>UGF field strength</div>
         </div>
         <canvas id="sim"></canvas>
         <p class="tooltip-text" style="margin-top:.6rem">
-          Click on the canvas to add a new particle at that location.
+          Click to add a positive particle · Shift+click for negative · Ctrl/⌘+click for dark matter.
           The field glow around each particle indicates local geometric coupling intensity.
         </p>
       </div>
@@ -294,7 +314,12 @@ let simOpts = {
   softening:20,
 };
 
+let showTrails  = true;
+let showVectors = false;
+let trailLen    = 40;
+
 function particleColor(p) {
+  if (p.charge === 0) return '#c0c8e8'; // dark matter
   return p.charge > 0 ? '#5b8dee' : '#e05b8d';
 }
 
@@ -309,6 +334,7 @@ function initParticles(n) {
       radius: 6 + Math.floor(Math.random() * 4),
     });
     p.color = particleColor(p);
+    p.trail = [];
     particles.push(p);
   }
 }
@@ -320,13 +346,57 @@ function drawFieldGlow(p) {
   const intensity = Math.min(1, simOpts.G2d / 1000 + simOpts.k2d / 2000);
   const r = p.radius * (2 + intensity * 4);
   const grad = ctx.createRadialGradient(p.x, p.y, p.radius * 0.5, p.x, p.y, r);
-  const col = p.charge > 0 ? '91,141,238' : '224,91,141';
+  const col = p.charge > 0 ? '91,141,238' : p.charge < 0 ? '224,91,141' : '150,160,200';
   grad.addColorStop(0, `rgba(${col},${0.25 * intensity})`);
   grad.addColorStop(1, `rgba(${col},0)`);
   ctx.beginPath();
   ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
   ctx.fillStyle = grad;
   ctx.fill();
+}
+
+function drawTrails() {
+  particles.forEach(p => {
+    if (!p.trail || p.trail.length < 2) return;
+    const col = p.charge > 0 ? '91,141,238' : p.charge < 0 ? '224,91,141' : '150,160,200';
+    for (let i = 1; i < p.trail.length; i++) {
+      const alpha = (i / p.trail.length) * 0.35;
+      ctx.beginPath();
+      ctx.moveTo(p.trail[i - 1].x, p.trail[i - 1].y);
+      ctx.lineTo(p.trail[i].x, p.trail[i].y);
+      ctx.strokeStyle = `rgba(${col},${alpha})`;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    }
+  });
+}
+
+function drawVelocityVectors() {
+  const scale = 12;
+  particles.forEach(p => {
+    const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+    if (speed < 0.05) return;
+    const ex = p.x + p.vx * scale;
+    const ey = p.y + p.vy * scale;
+    const angle = Math.atan2(p.vy, p.vx);
+    const hs = 5;
+    ctx.save();
+    ctx.globalAlpha = 0.65;
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - hs * Math.cos(angle - 0.4), ey - hs * Math.sin(angle - 0.4));
+    ctx.lineTo(ex - hs * Math.cos(angle + 0.4), ey - hs * Math.sin(angle + 0.4));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  });
 }
 
 function drawForceLines() {
@@ -375,8 +445,10 @@ function render() {
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
   }
 
+  if (showTrails) drawTrails();
   drawForceLines();
   particles.forEach(drawParticle);
+  if (showVectors) drawVelocityVectors();
 
   // Frame counter overlay
   ctx.fillStyle = 'rgba(122,132,170,0.5)';
@@ -404,14 +476,22 @@ function countClusters() {
 }
 
 function updateStats() {
-  document.getElementById('stat-n').textContent       = particles.length;
-  document.getElementById('stat-frame').textContent   = frame;
-  document.getElementById('stat-speed').textContent   = computeAvgSpeed();
+  document.getElementById('stat-n').textContent        = particles.length;
+  document.getElementById('stat-frame').textContent    = frame;
+  document.getElementById('stat-speed').textContent    = computeAvgSpeed();
   document.getElementById('stat-clusters').textContent = countClusters();
+  document.getElementById('stat-ke').textContent       = UGF.computeKineticEnergy(particles).toFixed(1);
 }
 
 function loop() {
   if (!paused) {
+    if (showTrails && trailLen > 0) {
+      particles.forEach(p => {
+        if (!p.trail) p.trail = [];
+        p.trail.push({ x: p.x, y: p.y });
+        if (p.trail.length > trailLen) p.trail.shift();
+      });
+    }
     UGF.stepSimulation(particles, 0.016, canvas.width, canvas.height, simOpts);
     frame++;
     if (frame % 60 === 0) updateStats();
@@ -483,6 +563,7 @@ document.getElementById('btn-spawn').addEventListener('click', () => {
       radius: 6,
     });
     p.color = particleColor(p);
+    p.trail = [];
     particles.push(p);
   }
   updateStats();
@@ -494,19 +575,24 @@ canvas.addEventListener('click', e => {
   const rect = canvas.getBoundingClientRect();
   const x = (e.clientX - rect.left) * (canvas.width  / rect.width);
   const y = (e.clientY - rect.top)  * (canvas.height / rect.height);
-  const charge = e.shiftKey ? -1 : 1;
+  const isDark = e.ctrlKey || e.metaKey;
+  const charge = isDark ? 0 : (e.shiftKey ? -1 : 1);
+  const mass   = isDark ? 3 : 1;
+  const radius = isDark ? 9 : 7;
   const p = UGF.createParticle(particles.length, canvas.width, canvas.height, {
     x, y,
     vx: (Math.random() - 0.5) * 2,
     vy: (Math.random() - 0.5) * 2,
-    mass: 1,
+    mass,
     charge,
-    radius: 7,
+    radius,
   });
   p.color = particleColor(p);
+  p.trail = [];
   particles.push(p);
   updateStats();
-  logEvent(`Particle added at (${Math.round(x)}, ${Math.round(y)}) charge=${charge > 0 ? '+' : '−'}`);
+  const chargeLabel = isDark ? 'dark matter' : (charge > 0 ? '+' : '−');
+  logEvent(`Particle added at (${Math.round(x)}, ${Math.round(y)}) type=${chargeLabel}`);
 });
 
 // Presets
@@ -531,6 +617,52 @@ document.getElementById('ctrl-preset').addEventListener('change', e => {
   document.getElementById('lbl-nexp').textContent   = p.forceExp.toFixed(1);
   document.getElementById('lbl-damp').textContent = p.damping.toFixed(3);
   logEvent(`Preset loaded: ${e.target.value}`);
+});
+
+// ──────────────────────────────────────────────────────────────
+// 6b.  New feature controls
+// ──────────────────────────────────────────────────────────────
+
+// Trail length slider
+document.getElementById('ctrl-trail').addEventListener('input', e => {
+  trailLen = parseInt(e.target.value);
+  document.getElementById('lbl-trail').textContent = trailLen;
+  if (trailLen === 0) particles.forEach(p => { p.trail = []; });
+});
+
+// Trails toggle
+document.getElementById('btn-trails').addEventListener('click', () => {
+  showTrails = !showTrails;
+  document.getElementById('btn-trails').textContent = `🌠 Trails: ${showTrails ? 'On' : 'Off'}`;
+  if (!showTrails) particles.forEach(p => { p.trail = []; });
+});
+
+// Velocity vectors toggle
+document.getElementById('btn-vectors').addEventListener('click', () => {
+  showVectors = !showVectors;
+  document.getElementById('btn-vectors').textContent = `↗ Vectors: ${showVectors ? 'On' : 'Off'}`;
+});
+
+// Dark matter spawn
+document.getElementById('btn-darkmatter').addEventListener('click', () => {
+  for (let i = 0; i < 3; i++) {
+    const cx = canvas.width  / 2 + (Math.random() - 0.5) * 200;
+    const cy = canvas.height / 2 + (Math.random() - 0.5) * 200;
+    const p = UGF.createParticle(particles.length + i, canvas.width, canvas.height, {
+      x: cx,
+      y: cy,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: (Math.random() - 0.5) * 1.5,
+      mass: 3 + Math.random() * 2,
+      charge: 0,
+      radius: 9,
+    });
+    p.color = particleColor(p);
+    p.trail = [];
+    particles.push(p);
+  }
+  updateStats();
+  logEvent('Spawned 3 dark matter particles.');
 });
 
 // ──────────────────────────────────────────────────────────────

@@ -126,6 +126,17 @@ const x0 = particles[0].x;
 UGF.stepSimulation(particles, 0.016, 800, 600, { G2d: 500, k2d: 800, forceExp: 1.5, damping: 0.99, softening: 20 });
 assert(particles[0].x !== x0, 'particles move after step');
 
+// ── Kinetic energy ────────────────────────────────────────────
+console.log('\n[computeKineticEnergy]');
+const keParticles = [
+  { vx: 1, vy: 0, mass: 2 },    // ½·2·1    = 1
+  { vx: 0, vy: 2, mass: 1 },    // ½·1·4    = 2
+  { vx: 3, vy: 4, mass: 0.5 },  // ½·0.5·25 = 6.25
+];
+assertClose(UGF.computeKineticEnergy(keParticles), 9.25, 1e-10, 'KE of three particles');
+assertClose(UGF.computeKineticEnergy([{ vx: 0, vy: 0, mass: 5 }]), 0, 1e-10, 'KE of stationary particle = 0');
+assert(UGF.computeKineticEnergy([]) === 0, 'KE of empty array = 0');
+
 // ── Summary ───────────────────────────────────────────────────
 console.log(`\n${'─'.repeat(40)}`);
 console.log(`Results: ${passed} passed, ${failed} failed`);

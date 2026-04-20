@@ -225,6 +225,17 @@ const UGF = (() => {
   }
 
   /**
+   * Total kinetic energy of a particle system (simulation units).
+   * KE = Σ ½·m·v²
+   */
+  function computeKineticEnergy(particles) {
+    return particles.reduce(
+      (sum, p) => sum + 0.5 * p.mass * (p.vx * p.vx + p.vy * p.vy),
+      0
+    );
+  }
+
+  /**
    * Advance simulation by one time-step dt using Euler integration.
    * Reflects particles off canvas walls.
    */
@@ -326,6 +337,7 @@ const UGF = (() => {
     // Simulation
     createParticle,
     stepSimulation,
+    computeKineticEnergy,
     // Chart data helpers
     forceComparisonData,
     hubbleChartData,
