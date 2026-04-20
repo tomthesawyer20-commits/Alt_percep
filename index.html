@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alt_percep — Data Explorer</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────────── -->
+<nav>
+  <span class="logo">⬡ Alt_percep</span>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active">Data Explorer</a></li>
+    <li><a href="simulator.html">Simulator</a></li>
+    <li><a href="https://github.com/tomthesawyer20-commits/Alt_percep" target="_blank" rel="noopener">GitHub</a></li>
+  </ul>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────────── -->
+<header class="hero">
+  <span class="badge">Unified Geometric Field Model</span>
+  <h1>Alternative Perception<br/>of the Universe</h1>
+  <p class="tagline">
+    Explore an alternative cosmological framework where gravity, electromagnetism,
+    and the nuclear forces emerge as curvature phenomena at different geometric scales.
+  </p>
+  <div class="hero-ctas">
+    <a href="#data" class="btn btn-primary">Explore Data ↓</a>
+    <a href="simulator.html" class="btn btn-outline">Open Simulator →</a>
+  </div>
+</header>
+
+<!-- ── Main content ────────────────────────────────────────── -->
+<main id="data">
+
+  <!-- Key stats -->
+  <section>
+    <div class="section-header">
+      <span class="section-label">Model Overview</span>
+      <h2>Unified Geometric Field at a Glance</h2>
+      <p>Four fundamental forces, one geometric origin — curvature at different scales of spacetime.</p>
+    </div>
+    <div class="grid-4" id="stat-cards">
+      <div class="stat-card c1">
+        <span class="stat-label">Gravity</span>
+        <span class="stat-value" id="sv-gravity">—</span>
+        <span class="stat-sub">Large-scale Riemannian curvature</span>
+      </div>
+      <div class="stat-card c2">
+        <span class="stat-label">Electromagnetism</span>
+        <span class="stat-value" id="sv-em">—</span>
+        <span class="stat-sub">Medium-scale torsional oscillations</span>
+      </div>
+      <div class="stat-card c3">
+        <span class="stat-label">Strong Force</span>
+        <span class="stat-value" id="sv-strong">—</span>
+        <span class="stat-sub">Micro-scale curvature nodes</span>
+      </div>
+      <div class="stat-card c4">
+        <span class="stat-label">Weak Force</span>
+        <span class="stat-value" id="sv-weak">—</span>
+        <span class="stat-sub">Micro-scale curvature transitions</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tab-based charts -->
+  <section>
+    <div class="section-header">
+      <span class="section-label">Interactive Charts</span>
+      <h2>Model Predictions</h2>
+    </div>
+
+    <div class="card">
+      <div class="tab-bar" role="tablist">
+        <button class="tab-btn active" role="tab" data-tab="forces">Force Strengths</button>
+        <button class="tab-btn" role="tab" data-tab="hubble">Hubble Rate</button>
+        <button class="tab-btn" role="tab" data-tab="density">Energy Density</button>
+        <button class="tab-btn" role="tab" data-tab="deviation">UGF vs ΛCDM</button>
+      </div>
+
+      <!-- Forces tab -->
+      <div class="tab-panel active" id="tab-forces">
+        <p style="margin-bottom:1rem">
+          Relative force strengths (log₁₀ scale) across 10 decades of length from
+          sub-nuclear (10⁻¹⁸ m) to micron (10⁻⁶ m) scales.
+        </p>
+        <div class="chart-wrap">
+          <canvas id="chartForces"></canvas>
+        </div>
+      </div>
+
+      <!-- Hubble tab -->
+      <div class="tab-panel" id="tab-hubble">
+        <p style="margin-bottom:1rem">
+          UGF-modified Friedmann expansion rate H(z) vs standard ΛCDM,
+          showing the geometric curvature correction term Ω<sub>geo</sub>.
+        </p>
+        <div class="chart-wrap">
+          <canvas id="chartHubble"></canvas>
+        </div>
+      </div>
+
+      <!-- Energy density tab -->
+      <div class="tab-panel" id="tab-density">
+        <p style="margin-bottom:1rem">
+          Fractional energy densities across cosmic epochs (scale factor a).
+          The geometric term replaces a portion of the dark energy budget.
+        </p>
+        <div class="chart-wrap tall">
+          <canvas id="chartDensity"></canvas>
+        </div>
+      </div>
+
+      <!-- Deviation tab -->
+      <div class="tab-panel" id="tab-deviation">
+        <p style="margin-bottom:1rem">
+          Percentage deviation of UGF Hubble rate from ΛCDM as a function of redshift z.
+          Positive deviation indicates accelerated expansion at high-z in the UGF model.
+        </p>
+        <div class="chart-wrap">
+          <canvas id="chartDeviation"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Model equations -->
+  <section>
+    <div class="section-header">
+      <span class="section-label">Theory</span>
+      <h2>Core Equations</h2>
+      <p>The UGF model is built on three foundational equations linking geometry and force.</p>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <p class="card-title">Geometric Coupling Function</p>
+        <div class="eq-box">F_ugf(r) = κ · (l_P / r)ⁿ</div>
+        <p class="tooltip-text" style="margin-top:.75rem">
+          κ is the force-specific coupling constant, l_P is the Planck length,
+          and n sets the geometric scale exponent for each force.
+        </p>
+      </div>
+      <div class="card">
+        <p class="card-title">Modified Friedmann Equation</p>
+        <div class="eq-box">H²(z) = H₀² [Ω_m(1+z)³ + Ω_Λ + Ω_geo(1+z)^(4/3)]</div>
+        <p class="tooltip-text" style="margin-top:.75rem">
+          Ω_geo ≈ 0.02 encodes geometric curvature in the cosmic expansion history,
+          partially replacing the dark energy contribution.
+        </p>
+      </div>
+      <div class="card">
+        <p class="card-title">UGF Gravitational Force</p>
+        <div class="eq-box">F_grav = G·m₁·m₂/r² · [1 + κ_g·(l_P/r)²]</div>
+        <p class="tooltip-text" style="margin-top:.75rem">
+          Classical Newtonian gravity with a Planck-scale correction term that
+          becomes significant only at sub-nuclear distances.
+        </p>
+      </div>
+      <div class="card">
+        <p class="card-title">UGF Strong Force</p>
+        <div class="eq-box">F_s = α_s·ℏc/r² · e^(-r/r_s) · (1 + κ_s)</div>
+        <p class="tooltip-text" style="margin-top:.75rem">
+          Yukawa-type confinement with a geometric curvature node amplification
+          at the hadronic scale (r_s ≈ 1 fm).
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Data tables -->
+  <section>
+    <div class="section-header">
+      <span class="section-label">Reference Data</span>
+      <h2>Physical Constants &amp; Model Parameters</h2>
+    </div>
+    <div class="grid-2">
+      <div class="card" style="overflow-x:auto">
+        <p class="card-title">Physical Constants (SI)</p>
+        <table class="data-table" id="table-constants">
+          <thead>
+            <tr><th>Symbol</th><th>Name</th><th>Value</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="card" style="overflow-x:auto">
+        <p class="card-title">UGF Model Parameters</p>
+        <table class="data-table" id="table-params">
+          <thead>
+            <tr><th>Parameter</th><th>Value</th><th>Force</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    Alt_percep · Unified Geometric Field Model ·
+    <a href="https://github.com/tomthesawyer20-commits/Alt_percep" target="_blank" rel="noopener">GitHub</a>
+    · MIT License
+  </p>
+</footer>
+
+<script src="model.js"></script>
+<script>
+// ── Tab switching ────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+  });
+});
+
+// ── Chart.js defaults ────────────────────────────────────────
+Chart.defaults.color        = '#7a84aa';
+Chart.defaults.borderColor  = '#2a3155';
+Chart.defaults.font.family  = "'Inter', system-ui, sans-serif";
+
+// ── Stat cards ───────────────────────────────────────────────
+(function renderStats() {
+  const strengths = UGF.forceStrengthsAt(1e-15);
+  const fmt = v => {
+    const e = Math.floor(Math.log10(Math.abs(v)));
+    return `10^${e}`;
+  };
+  document.getElementById('sv-gravity').textContent  = fmt(Math.abs(strengths.gravityRatio));
+  document.getElementById('sv-em').textContent       = fmt(Math.abs(strengths.electromagneticRatio));
+  document.getElementById('sv-strong').textContent   = fmt(Math.abs(strengths.strongRatio));
+  document.getElementById('sv-weak').textContent     = fmt(Math.abs(strengths.weakRatio));
+})();
+
+// ── Force strength chart ─────────────────────────────────────
+(function renderForceChart() {
+  const data = UGF.forceComparisonData();
+  new Chart(document.getElementById('chartForces'), {
+    type: 'line',
+    data: {
+      labels: data.labels,
+      datasets: [
+        { label: 'Gravity',         data: data.gravity,         borderColor: '#5b8dee', backgroundColor: 'rgba(91,141,238,.08)', tension: .3, pointRadius: 4 },
+        { label: 'Electromagnetism',data: data.electromagnetic, borderColor: '#e05b8d', backgroundColor: 'rgba(224,91,141,.08)', tension: .3, pointRadius: 4 },
+        { label: 'Strong',          data: data.strong,          borderColor: '#5be0b0', backgroundColor: 'rgba(91,224,176,.08)', tension: .3, pointRadius: 4 },
+        { label: 'Weak',            data: data.weak,            borderColor: '#e0b05b', backgroundColor: 'rgba(224,176,91,.08)', tension: .3, pointRadius: 4 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: { mode: 'index', intersect: false,
+          callbacks: { label: ctx => ` ${ctx.dataset.label}: 10^${ctx.parsed.y.toFixed(1)}` } },
+      },
+      scales: {
+        y: { title: { display: true, text: 'log₁₀(Strength / F_gravity at 1fm)' } },
+        x: { title: { display: true, text: 'Length Scale' } },
+      },
+    },
+  });
+})();
+
+// ── Hubble rate chart ────────────────────────────────────────
+(function renderHubbleChart() {
+  const data = UGF.hubbleChartData();
+  new Chart(document.getElementById('chartHubble'), {
+    type: 'line',
+    data: {
+      labels: data.labels,
+      datasets: [
+        { label: 'UGF Model', data: data.H_ugf,  borderColor: '#5b8dee', backgroundColor: 'rgba(91,141,238,.1)', tension: .3 },
+        { label: 'ΛCDM',      data: data.H_lcdm, borderColor: '#e05b8d', backgroundColor: 'rgba(224,91,141,.1)', tension: .3, borderDash: [6,3] },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        y: { title: { display: true, text: 'H(z)  [km/s/Mpc]' } },
+        x: { title: { display: true, text: 'Redshift z' }, ticks: { maxTicksLimit: 10 } },
+      },
+    },
+  });
+})();
+
+// ── Energy density chart ─────────────────────────────────────
+(function renderDensityChart() {
+  const data = UGF.energyDensityData();
+  new Chart(document.getElementById('chartDensity'), {
+    type: 'bar',
+    data: {
+      labels: data.labels,
+      datasets: [
+        { label: 'Radiation',    data: data.radiation,  backgroundColor: '#e05b8d' },
+        { label: 'Matter',       data: data.matter,     backgroundColor: '#5b8dee' },
+        { label: 'Dark Energy',  data: data.darkEnergy, backgroundColor: '#7a84aa' },
+        { label: 'Geometric (UGF)', data: data.geometric, backgroundColor: '#5be0b0' },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        x: { stacked: true, title: { display: true, text: 'Scale Factor a' } },
+        y: { stacked: true, min: 0, max: 1, title: { display: true, text: 'Fractional Energy Density' } },
+      },
+    },
+  });
+})();
+
+// ── Deviation chart ──────────────────────────────────────────
+(function renderDeviationChart() {
+  const data = UGF.hubbleChartData();
+  new Chart(document.getElementById('chartDeviation'), {
+    type: 'line',
+    data: {
+      labels: data.labels,
+      datasets: [{
+        label: 'UGF − ΛCDM deviation (%)',
+        data: data.deviation,
+        borderColor: '#5be0b0',
+        backgroundColor: 'rgba(91,224,176,.1)',
+        tension: .3,
+        fill: true,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y.toFixed(3)} %` } } },
+      scales: {
+        y: { title: { display: true, text: 'Deviation (%)' } },
+        x: { title: { display: true, text: 'Redshift z' }, ticks: { maxTicksLimit: 10 } },
+      },
+    },
+  });
+})();
+
+// ── Constants table ──────────────────────────────────────────
+(function renderTables() {
+  const constantRows = [
+    ['c',   'Speed of light',        '2.998 × 10⁸ m/s'],
+    ['G',   'Gravitational constant','6.674 × 10⁻¹¹ N·m²/kg²'],
+    ['ℏ',   'Reduced Planck',        '1.055 × 10⁻³⁴ J·s'],
+    ['α',   'Fine-structure',        '7.297 × 10⁻³'],
+    ['α_s', 'Strong coupling',       '0.118'],
+    ['k_B', 'Boltzmann constant',    '1.381 × 10⁻²³ J/K'],
+    ['H₀',  'Hubble constant',       '67.4 km/s/Mpc'],
+    ['Λ',   'Cosmological const.',   '1.089 × 10⁻⁵² m⁻²'],
+    ['l_P', 'Planck length',         '1.616 × 10⁻³⁵ m'],
+  ];
+  const tbody1 = document.querySelector('#table-constants tbody');
+  tbody1.innerHTML = constantRows.map(([sym, name, val]) =>
+    `<tr><td><code>${sym}</code></td><td>${name}</td><td>${val}</td></tr>`
+  ).join('');
+
+  const paramRows = [
+    ['κ_gravity','1.0',      '<span class="pill pill-blue">Gravity</span>'],
+    ['κ_em',     '1/137',    '<span class="pill pill-rose">EM</span>'],
+    ['κ_strong', '1.0',      '<span class="pill pill-teal">Strong</span>'],
+    ['κ_weak',   '1.18×10⁻⁵','<span class="pill pill-amber">Weak</span>'],
+    ['n_gravity','2',         '<span class="pill pill-blue">Gravity</span>'],
+    ['n_em',     '1',         '<span class="pill pill-rose">EM</span>'],
+    ['n_strong', '0',         '<span class="pill pill-teal">Strong</span>'],
+    ['n_weak',   '0.5',       '<span class="pill pill-amber">Weak</span>'],
+    ['Ω_geo',    '0.02',      '<span class="pill pill-teal">Cosmology</span>'],
+  ];
+  const tbody2 = document.querySelector('#table-params tbody');
+  tbody2.innerHTML = paramRows.map(([p, v, force]) =>
+    `<tr><td><code>${p}</code></td><td>${v}</td><td>${force}</td></tr>`
+  ).join('');
+})();
+</script>
+</body>
+</html>
